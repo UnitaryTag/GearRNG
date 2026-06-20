@@ -82,10 +82,10 @@ function MenuSceneBuilder:placeHeroTree()
 				if child:IsA("MeshPart") then
 					if isLeaves then
 						child.Color = Color3.fromRGB(55, 135, 45)
-						child.Material = Enum.Material.Grass; child.DoubleSided = true; local sa = Instance.new("SurfaceAppearance"); sa.Parent = child
+						child.Material = Enum.Material.Grass; child.DoubleSided = true
 					else
 						child.Color = Color3.fromRGB(85, 60, 35)
-						child.Material = Enum.Material.Wood; local sa = Instance.new("SurfaceAppearance"); sa.Parent = child
+						child.Material = Enum.Material.Wood
 					end
 				end
 			end
