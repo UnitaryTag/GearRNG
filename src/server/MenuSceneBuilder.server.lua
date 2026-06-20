@@ -1,0 +1,173 @@
+-- MenuSceneBuilder.server.lua
+-- Places the HeroTree, grass tufts, rocks, and other props in the 3D menu world.
+-- Assets are expected in ReplicatedStorage.Assets.
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local ServerStorage = game:GetService("ServerStorage")
+
+local MenuSceneBuilder = {}
+
+-- Configuration for scene elements
+local CONFIG = {
+	TreePosition = Vector3.new(0, 0, 0),
+	GroundSize = 100, -- studs radius of the grassy area
+	GrassCount = 60,
+	RockCount = 8,
+	ParticleCount = 15, -- floating ambient particles
+}
+
+-- ── Helpers ──────────────────────────────────────────────────
+local function placeAsset(assetName, position, rotation, parent)
+	local asset = ReplicatedStorage.Assets:FindFirstChild(assetName)
+	if not asset then
+		warn("[MenuSceneBuilder] Asset not found: " .. assetName)
+		return nil
+	end
+
+	local clone = asset:Clone()
+	clone:PivotTo(CFrame.new(position) * CFrame.Angles(rotation or 0, 0, 0))
+	clone.Parent = parent or workspace
+	return clone
+end
+
+local function randomPositionInCircle(center, radius)
+	local angle = math.random() * math.pi * 2
+	local dist = math.sqrt(math.random()) * radius
+	return center + Vector3.new(
+		math.cos(angle) * dist,
+		0,
+		math.sin(angle) * dist
+	)
+end
+
+-- ── Ground Plane ─────────────────────────────────────────────
+function MenuSceneBuilder:buildGround()
+	local ground = Instance.new("Part")
+	ground.Name = "MenuGround"
+	ground.Size = Vector3.new(CONFIG.GroundSize * 2, 0.5, CONFIG.GroundSize * 2)
+	ground.Position = Vector3.new(0, -0.25, 0)
+	ground.Anchored = true
+	ground.BrickColor = BrickColor.new("Earth green")
+	ground.Material = Enum.Material.Grass
+	ground.Parent = workspace
+
+	print("[MenuSceneBuilder] Ground plane created.")
+	return ground
+end
+
+-- ── Hero Tree ────────────────────────────────────────────────
+function MenuSceneBuilder:placeHeroTree()
+	local tree = placeAsset("HeroTree", CONFIG.TreePosition, nil, workspace)
+	if tree then
+		tree.Name = "HeroTree"
+		-- Scale to appropriate size (Blender units → Roblox studs)
+		-- Tree is ~1.7x1.3x10.8 studs from Blender
+		print("[MenuSceneBuilder] HeroTree placed at " .. tostring(CONFIG.TreePosition))
+	end
+	return tree
+end
+
+-- ── Grass Tufts ──────────────────────────────────────────────
+function MenuSceneBuilder:scatterGrass(center)
+	for i = 1, CONFIG.GrassCount do
+		local pos = randomPositionInCircle(center, CONFIG.GroundSize * 0.8)
+		-- Don't place grass too close to the tree
+		if (pos - center).Magnitude > 5 then
+			local grass = placeAsset("GrassTuft", pos, math.rad(math.random(0, 360)), workspace)
+			if grass then
+				grass.Name = "Grass_" .. i
+				-- Randomize scale for variety
+				local s = 0.8 + math.random() * 0.6
+				grass:ScaleTo(s)
+			end
+		end
+	end
+	print("[MenuSceneBuilder] " .. CONFIG.GrassCount .. " grass tufts scattered.")
+end
+
+-- ── Rocks ────────────────────────────────────────────────────
+function MenuSceneBuilder:scatterRocks(center)
+	-- Generate simple rocks from parts if no rock asset exists
+	for i = 1, CONFIG.RockCount do
+		local pos = randomPositionInCircle(center, CONFIG.GroundSize * 0.7)
+		if (pos - center).Magnitude > 8 then
+			local rock = Instance.new("Part")
+			rock.Name = "Rock_" .. i
+			rock.Size = Vector3.new(
+				1 + math.random() * 2,
+				0.5 + math.random() * 1.5,
+				1 + math.random() * 2
+			)
+			rock.Position = pos + Vector3.new(0, rock.Size.Y / 2, 0)
+			rock.Anchored = true
+			rock.BrickColor = BrickColor.new("Dark stone grey")
+			rock.Material = Enum.Material.Slate
+			rock.Parent = workspace
+		end
+	end
+	print("[MenuSceneBuilder] " .. CONFIG.RockCount .. " rocks placed.")
+end
+
+-- ── Ambient Particles ────────────────────────────────────────
+function MenuSceneBuilder:createAmbientParticles()
+	local attachments = {}
+	for i = 1, CONFIG.ParticleCount do
+		local attach = Instance.new("Attachment")
+		attach.Name = "ParticlePoint_" .. i
+		attach.Position = Vector3.new(
+			math.random(-30, 30),
+			math.random(1, 15),
+			math.random(-30, 30)
+		)
+		attach.Parent = workspace.Terrain
+
+		local emitter = Instance.new("ParticleEmitter")
+		emitter.Texture = "rbxassetid://0" -- Use a generic sparkle/dust texture
+		emitter.Rate = 0.5
+		emitter.Lifetime = NumberRange.new(4, 8)
+		emitter.Speed = NumberRange.new(0.2, 0.8)
+		emitter.Size = NumberSequence.new(0.1)
+		emitter.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.5), NumberSequenceKeypoint.new(1, 1)})
+		emitter.Color = ColorSequence.new(Color3.fromRGB(255, 220, 150))
+		emitter.LightEmission = 0.3
+		emitter.SpreadAngle = Vector2.new(180, 180)
+		emitter.Parent = attach
+
+		table.insert(attachments, attach)
+	end
+	print("[MenuSceneBuilder] " .. CONFIG.ParticleCount .. " ambient particle emitters created.")
+	return attachments
+end
+
+-- ── Main Build ───────────────────────────────────────────────
+function MenuSceneBuilder:buildAll()
+	print("[MenuSceneBuilder] Building menu scene...")
+
+	self:buildGround()
+	self:placeHeroTree()
+	self:scatterGrass(CONFIG.TreePosition)
+	self:scatterRocks(CONFIG.TreePosition)
+	self:createAmbientParticles()
+
+	-- ── Invisible Walls (keep player in the scene) ──────────
+	local wallSize = CONFIG.GroundSize
+	local wallHeight = 20
+	for _, neg in ipairs({-1, 1}) do
+		for _, axis in ipairs({"X", "Z"}) do
+			local wall = Instance.new("Part")
+			wall.Name = "Boundary_" .. axis .. (neg == 1 and "Pos" or "Neg")
+			wall.Size = axis == "X" and Vector3.new(1, wallHeight, wallSize * 2)
+				or Vector3.new(wallSize * 2, wallHeight, 1)
+			wall.Position = axis == "X" and Vector3.new(neg * wallSize, wallHeight / 2, 0)
+				or Vector3.new(0, wallHeight / 2, neg * wallSize)
+			wall.Anchored = true
+			wall.Transparency = 1
+			wall.CanCollide = true
+			wall.Parent = workspace
+		end
+	end
+
+	print("[MenuSceneBuilder] Menu scene build complete!")
+end
+
+return MenuSceneBuilder

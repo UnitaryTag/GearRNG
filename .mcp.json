@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "studio-mcp": {
+      "command": "/home/willi/Documents/GearRNG/studio-mcp/.venv/bin/python",
+      "args": ["/home/willi/Documents/GearRNG/studio-mcp/bridge.py"],
+      "cwd": "/home/willi/Documents/GearRNG/studio-mcp"
+    }
+  }
+}

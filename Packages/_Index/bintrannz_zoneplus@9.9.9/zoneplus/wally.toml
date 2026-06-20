@@ -1,0 +1,14 @@
+[package]
+name = "bintrannz/zoneplus"
+description = "A fork of ZonePlus (1ForeverHD/ZonePlus)"
+license = "MIT"
+realm = "shared"
+registry = "https://github.com/UpliftGames/wally-index"
+version = "9.9.9"
+exclude = [
+	"docs", ".moonwave", "test",
+	"ZonePlus.rbxm", "ZonePlus.rbxmx",
+	".gitignore", "foreman.toml",
+]
+
+[dependencies]

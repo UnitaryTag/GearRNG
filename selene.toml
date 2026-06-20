@@ -1,0 +1,73 @@
+[selene]
+# Selene linter config for Roblox Luau
+# Matches standard Roblox practices
+
+[lints]
+# Standard ruleset
+std = "all"
+roblox = "all"
+
+[rules]
+# Allow some flexibility
+unused_variable = "allow"
+empty_if = "allow"
+
+[config]
+# Roblox global environment
+globals = [
+    "game",
+    "workspace",
+    "script",
+    "plugin",
+    "shared",
+    "require",
+    "print",
+    "warn",
+    "error",
+    "task",
+    "tick",
+    "time",
+    "DateTime",
+    "delay",
+    "spawn",
+    "wait",
+    "typeof",
+    "type",
+    "Instance",
+    "Enum",
+    "Color3",
+    "Vector2",
+    "Vector3",
+    "CFrame",
+    "UDim2",
+    "Rect",
+    "Ray",
+    "TweenInfo",
+    "NumberRange",
+    "NumberSequence",
+    "ColorSequence",
+    "BrickColor",
+    "CatalogSearchParams",
+    "DateTime",
+    "DockWidgetPluginGuiInfo",
+    "Faces",
+    "PathWaypoint",
+    "Random",
+    "RaycastParams",
+    "Region3",
+    "Region3int16",
+    "Axes",
+    "OverlapParams",
+    "PhysicalProperties",
+    "Secret",
+    "Path",
+    "debug",
+    "os",
+    "math",
+    "table",
+    "string",
+    "coroutine",
+    "utf8",
+    "bit32",
+    "buffer"
+]

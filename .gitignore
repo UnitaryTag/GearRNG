@@ -1,0 +1,14 @@
+# Python
+studio-mcp/.venv/
+__pycache__/
+*.pyc
+
+# Claude Code (personal settings)
+.claude/
+
+# Generated
+sourcemap.json
+
+# OS
+.DS_Store
+Thumbs.db

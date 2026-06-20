@@ -1,0 +1,72 @@
+{
+  // ── MCP Servers ──────────────────────────────────────────────
+  "mcp.servers": {
+    "studio-mcp": {
+      "type": "stdio",
+      "command": "/home/willi/Downloads/IdleBrainrot/studio-mcp/.venv/bin/python",
+      "args": [
+        "/home/willi/Downloads/IdleBrainrot/studio-mcp/bridge.py"
+      ]
+    },
+    "blender-mcp": {
+      "type": "stdio",
+      "command": "/home/willi/Downloads/IdleBrainrot/blender-mcp/mcp-server/.venv/bin/python",
+      "args": [
+        "/home/willi/Downloads/IdleBrainrot/blender-mcp/mcp-server/server.py"
+      ],
+      "env": {
+        "BLENDER_MCP_HOST": "localhost",
+        "BLENDER_MCP_PORT": "9876"
+      }
+    }
+  },
+
+  // ── Luau LSP ─────────────────────────────────────────────────
+  "luau-lsp.require.mode": "relativeToFile",
+  "luau-lsp.require.directoryAliases": {
+    "@shared": "src/shared",
+    "@client": "src/client",
+    "@server": "src/server",
+    "@packages": "Packages"
+  },
+  "luau-lsp.types.definitionFiles": [
+    "Packages/_types/roblox.d.lua"
+  ],
+  "luau-lsp.types.documentationFiles": [],
+  "luau-lsp.platform.type": "roblox",
+  "luau-lsp.sourcemap.rojoProjectFile": "default.project.json",
+  "luau-lsp.sourcemap.enabled": true,
+  "luau-lsp.fflags.override": {
+    "LuauExtendedTypeRegistration": "true"
+  },
+
+  // ── Selene Linter ────────────────────────────────────────────
+  "selene.enable": true,
+  "selene.configPath": "selene.toml",
+
+  // ── Editor ───────────────────────────────────────────────────
+  "[luau]": {
+    "editor.defaultFormatter": "JohnnyMorganz.luau-lsp",
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true
+  },
+  "[lua]": {
+    "editor.defaultFormatter": "JohnnyMorganz.luau-lsp",
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true
+  },
+
+  // ── File Associations ────────────────────────────────────────
+  "files.associations": {
+    "*.lua": "luau",
+    "*.luau": "luau",
+    "*.project.json": "jsonc"
+  },
+
+  // ── Exclude build artifacts ──────────────────────────────────
+  "files.exclude": {
+    "**/.rokit": true,
+    "**/Packages": false
+}
+}
