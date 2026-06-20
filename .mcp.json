@@ -4,6 +4,11 @@
       "command": "/home/willi/Documents/GearRNG/studio-mcp/.venv/bin/python",
       "args": ["/home/willi/Documents/GearRNG/studio-mcp/bridge.py"],
       "cwd": "/home/willi/Documents/GearRNG/studio-mcp"
+    },
+    "blender-mcp": {
+      "command": "/home/willi/Documents/GearRNG/studio-mcp/.venv/bin/blender-mcp",
+      "args": [],
+      "cwd": "/home/willi/Documents/GearRNG/studio-mcp"
     }
   }
 }
