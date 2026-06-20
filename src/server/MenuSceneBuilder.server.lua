@@ -192,12 +192,25 @@ end
 function MenuSceneBuilder:buildAll()
 	print("[MenuSceneBuilder] Building menu scene...")
 
-	self:cleanupDefaults()
-	self:buildGround()
-	self:placeHeroTree()
-	self:scatterGrass(CONFIG.TreePosition)
-	self:scatterRocks(CONFIG.TreePosition)
-	self:createAmbientParticles()
+	-- Each step wrapped in pcall so one failure doesn't kill everything
+	local steps = {
+		{"cleanupDefaults", function() self:cleanupDefaults() end},
+		{"buildGround", function() self:buildGround() end},
+		{"placeHeroTree", function() self:placeHeroTree() end},
+		{"scatterGrass", function() self:scatterGrass(CONFIG.TreePosition) end},
+		{"scatterRocks", function() self:scatterRocks(CONFIG.TreePosition) end},
+		{"createAmbientParticles", function() self:createAmbientParticles() end},
+	}
+
+	for _, step in ipairs(steps) do
+		local name, fn = step[1], step[2]
+		local ok, err = pcall(fn)
+		if not ok then
+			warn("[MenuSceneBuilder] Step '" .. name .. "' failed: " .. tostring(err))
+		else
+			print("[MenuSceneBuilder] Step '" .. name .. "' done.")
+		end
+	end
 
 	-- ── Invisible Walls (keep player in the scene) ──────────
 	local wallSize = CONFIG.GroundSize
