@@ -76,6 +76,19 @@ function MenuSceneBuilder:placeHeroTree()
 		local piece = placeAsset(pieceName, CONFIG.TreePosition, nil, treeFolder)
 		if piece then
 			piece.Name = pieceName
+			-- Apply colors lost during FBX import
+			local isLeaves = (pieceName == "Tree_Leaves")
+			for _, child in piece:GetDescendants() do
+				if child:IsA("MeshPart") then
+					if isLeaves then
+						child.Color = Color3.fromRGB(60, 140, 50)
+						child.Material = Enum.Material.Grass
+					else
+						child.Color = Color3.fromRGB(90, 65, 40)
+						child.Material = Enum.Material.Wood
+					end
+				end
+			end
 		end
 	end
 
@@ -155,10 +168,20 @@ function MenuSceneBuilder:createAmbientParticles()
 	return attachments
 end
 
+-- ── Cleanup ────────────────────────────────────────────────
+function MenuSceneBuilder:cleanupDefaults()
+	-- Remove Studio's default Baseplate and hide SpawnLocation
+	local bp = workspace:FindFirstChild("Baseplate")
+	if bp then bp:Destroy() end
+	local spawn = workspace:FindFirstChild("SpawnLocation")
+	if spawn then spawn.Transparency = 1; spawn.CanCollide = false end
+end
+
 -- ── Main Build ───────────────────────────────────────────────
 function MenuSceneBuilder:buildAll()
 	print("[MenuSceneBuilder] Building menu scene...")
 
+	self:cleanupDefaults()
 	self:buildGround()
 	self:placeHeroTree()
 	self:scatterGrass(CONFIG.TreePosition)
