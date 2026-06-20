@@ -56,15 +56,31 @@ function MenuSceneBuilder:buildGround()
 end
 
 -- ── Hero Tree ────────────────────────────────────────────────
+-- Placed as 6 Z-band pieces (split for Roblox <20k tri limit)
+-- All pieces share the same Blender origin → align at TreePosition
+local TREE_PIECES = {
+	"Tree_Trunk_Lower",
+	"Tree_Trunk_Mid",
+	"Tree_Trunk_Upper",
+	"Tree_Trunk_Upper.001",
+	"Tree_Trunk_Canopy",
+	"Tree_Leaves",
+}
+
 function MenuSceneBuilder:placeHeroTree()
-	local tree = placeAsset("HeroTree", CONFIG.TreePosition, nil, workspace)
-	if tree then
-		tree.Name = "HeroTree"
-		-- Scale to appropriate size (Blender units → Roblox studs)
-		-- Tree is ~1.7x1.3x10.8 studs from Blender
-		print("[MenuSceneBuilder] HeroTree placed at " .. tostring(CONFIG.TreePosition))
+	local treeFolder = Instance.new("Folder")
+	treeFolder.Name = "HeroTree"
+	treeFolder.Parent = workspace
+
+	for _, pieceName in ipairs(TREE_PIECES) do
+		local piece = placeAsset(pieceName, CONFIG.TreePosition, nil, treeFolder)
+		if piece then
+			piece.Name = pieceName
+		end
 	end
-	return tree
+
+	print("[MenuSceneBuilder] HeroTree placed (" .. #TREE_PIECES .. " pieces) at " .. tostring(CONFIG.TreePosition))
+	return treeFolder
 end
 
 -- ── Grass Tufts ──────────────────────────────────────────────
