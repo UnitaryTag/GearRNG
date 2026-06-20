@@ -10,22 +10,27 @@ local MenuEnvironment = {}
 
 function MenuEnvironment:setup()
 	-- ── Time ────────────────────────────────────────────────
-	-- Warm golden-hour sunset — dramatic, diablo-esque
-	Lighting.ClockTime = 18.5
+	-- Golden sunrise — hopeful, warm morning light
+	Lighting.ClockTime = 5.5
+
+	-- ── Global Illumination ─────────────────────────────────
+	Lighting.Brightness = 4.0
+	Lighting.ExposureCompensation = 1.5  -- +3 stops, doubles effective brightness
+	Lighting.OutdoorAmbient = Color3.fromRGB(200, 180, 150)
+	Lighting.Ambient = Color3.fromRGB(80, 70, 60)
+	Lighting.EnvironmentDiffuseScale = 0.3  -- dynamic sky-derived fill
 
 	-- ── Atmosphere ──────────────────────────────────────────
-	-- Fog adds depth to the outdoor scene
-	Lighting.FogStart = 50
-	Lighting.FogEnd = 300
-	Lighting.FogColor = Color3.fromRGB(180, 140, 100)
+	Lighting.FogStart = 80
+	Lighting.FogEnd = 500
+	Lighting.FogColor = Color3.fromRGB(240, 210, 170)
 
-	-- Atmosphere instance for sky haze
+	-- Light haze for cinematic depth
 	local atmo = Instance.new("Atmosphere")
+	atmo.Density = 0.15
 	atmo.Parent = Lighting
 
 	-- ── Post-Processing ─────────────────────────────────────
-	Lighting.Brightness = 2.5
-
 	-- Bloom — subtle glow for magical loot vibe
 	Lighting.Bloom.Intensity = 0.4
 	Lighting.Bloom.Size = 24
@@ -34,17 +39,12 @@ function MenuEnvironment:setup()
 	-- Sun Rays
 	Lighting.SunRays.Intensity = 0.15
 
-	-- Depth of Field — blurs distant edges, cinematic look
+	-- Depth of Field — cinematic focus
 	Lighting.DepthOfField.Enabled = true
 	Lighting.DepthOfField.FarIntensity = 0.15
 	Lighting.DepthOfField.FocusDistance = 30
 	Lighting.DepthOfField.InFocusRadius = 20
 	Lighting.DepthOfField.NearIntensity = 0.5
-
-	-- Color Correction — warm fantasy tint
-	local cc = Instance.new("ColorCorrectionEffect")
-	cc.TintColor = Color3.fromRGB(255, 230, 200)
-	cc.Parent = Lighting
 
 	-- ── Ambient Music ───────────────────────────────────────
 	local menuAmbience = Instance.new("Sound")
