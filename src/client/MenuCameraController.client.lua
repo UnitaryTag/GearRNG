@@ -69,6 +69,9 @@ end
 local function onRenderStep(deltaTime)
 	if not isActive then return end
 
+	-- Force-reassert camera control every frame
+	camera.CameraType = Enum.CameraType.Scriptable
+
 	-- Smooth lerp current offset toward target
 	local lerpFactor = 1 - math.exp(-CAM.LerpSpeed * deltaTime)
 	currentOffset = currentOffset:Lerp(targetOffset, lerpFactor)

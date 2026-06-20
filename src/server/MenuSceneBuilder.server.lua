@@ -170,11 +170,22 @@ end
 
 -- ── Cleanup ────────────────────────────────────────────────
 function MenuSceneBuilder:cleanupDefaults()
-	-- Remove Studio's default Baseplate and hide SpawnLocation
+	-- Remove Studio defaults
 	local bp = workspace:FindFirstChild("Baseplate")
 	if bp then bp:Destroy() end
 	local spawn = workspace:FindFirstChild("SpawnLocation")
-	if spawn then spawn.Transparency = 1; spawn.CanCollide = false end
+	if spawn then
+		for _, child in spawn:GetChildren() do
+			if child:IsA("Decal") then child:Destroy() end
+		end
+		spawn.Transparency = 1
+		spawn.CanCollide = false
+	end
+	-- Clear previous menu objects (prevents duplicates on re-run)
+	for _, name in ipairs({"HeroTree", "Grass", "MenuGround", "MenuDecor"}) do
+		local obj = workspace:FindFirstChild(name)
+		if obj then obj:Destroy() end
+	end
 end
 
 -- ── Main Build ───────────────────────────────────────────────
