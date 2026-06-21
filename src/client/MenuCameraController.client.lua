@@ -1,11 +1,12 @@
 -- MenuCameraController.client.lua
 -- LocalScript — fixed parallax camera framing the HeroTree and character.
+-- Matches Blender MainMenuCamera composition: close, intimate, golden hour.
 -- Mouse movement creates a subtle parallax offset (inverted).
 -- TweenToPlayPosition for transitioning into gameplay.
 --
--- Plan spec:
---   BASE_POS=(12, 4.8, 18), LOOK_AT=(-3, 2.4, 0)
---   MAX_OFFSET_X=3.5, MAX_OFFSET_Y=1.5, LERP_SPEED=4
+-- Blender reference (2026-06-21):
+--   MainMenuCamera: position (0.8, -4.5, 1.5), 35mm lens, looking at chest level.
+--   Character at SIT_POSITION (-4.5, 0.2, 2) facing 135° toward tree at origin.
 
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
@@ -15,16 +16,18 @@ local TweenService = game:GetService("TweenService")
 local MenuCameraController = {}
 
 -- ── Configuration ────────────────────────────────────────────
+-- Camera placed ~6 studs from character, front-right, slightly elevated.
+-- Matches Blender's intimate 35mm framing (vs old 18-stud establishing shot).
 local CAM = {
-	BasePos = Vector3.new(12, 4.8, 18),
-	LookAt = Vector3.new(-3, 2.4, 0),
+	BasePos = Vector3.new(-2.8, 2.4, 5.8),
+	LookAt = Vector3.new(-4.5, 2.2, 2.0),
 	MaxOffsetX = 3.5,
 	MaxOffsetY = 1.5,
 	LerpSpeed = 4,
 	FieldOfView = 60,
 	-- Play-transition target: tighter, lower angle
-	PlayPos = Vector3.new(8, 2.8, 10),
-	PlayLookAt = Vector3.new(-2, 2.0, 0),
+	PlayPos = Vector3.new(-2.8, 2.0, 4.8),
+	PlayLookAt = Vector3.new(-4.5, 2.0, 1.8),
 	PlayFov = 55,
 }
 

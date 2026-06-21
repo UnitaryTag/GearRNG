@@ -10,6 +10,7 @@ local MenuCharacterPoser = require(script.MenuCharacterPoser)
 local MenuCameraController = require(script.MenuCameraController)
 local MenuUIBuilder = require(script.MenuUIBuilder)
 local GrassWindSystem = require(script.GrassWindSystem)
+local LightingSystem = require(script.LightingSystem) -- auto-starts day/night cycle
 
 -- Require shared modules
 local MenuCoordinator = require(ReplicatedStorage.Modules.MenuCoordinator)
