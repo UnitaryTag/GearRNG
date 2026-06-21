@@ -9,6 +9,13 @@ __pycache__/
 # Generated
 sourcemap.json
 
+# Blender
+*.blend1
+*.blend2
+
+# Debug / temp
+assets/viewport_*.png
+
 # OS
 .DS_Store
 Thumbs.db
