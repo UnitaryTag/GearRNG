@@ -146,12 +146,12 @@ Viewport screenshot alternative: `save_viewport()` captures the current 3D viewp
 | LowerTorso | (0, -1, 0) | Butt on ground ✓ |
 | UpTorso | (0, -1, 0.4) | 8° backward lean (`rot_euler.x = 0.14`) |
 | Head | (0, -0.777, 1.984) | Face at Y=-0.777, back near tree |
-| IK_Hand.L | (0.700, -1.000, 0.000) | Hand on ground at side |
-| IK_Hand.R | (-0.700, -1.000, 0.000) | |
+| IK_Hand.L | (1.200, -1.000, 0.000) | Hand at side, outside torso width |
+| IK_Hand.R | (-1.200, -1.000, 0.000) | |
 | IK_LEG.L | (0.480, -3.472, -0.246) | **Compensated for foot rotation offset** |
 | IK_LEG.R | (-0.480, -3.472, -0.246) | |
-| POLE_ARM.L | (0.850, -0.900, 1.000) | Elbow guide — creates natural bend |
-| POLE_ARM.R | (-0.850, -0.900, 1.000) | |
+| POLE_ARM.L | (1.100, -0.850, 1.000) | Elbow guide — outward, natural bend |
+| POLE_ARM.R | (-1.100, -0.850, 1.000) | |
 | POLE_LEG.L | (0.500, -2.000, 0.000) | Knee guide — **aligned with full leg extension** |
 | POLE_LEG.R | (-0.500, -2.000, 0.000) | |
 
@@ -171,12 +171,12 @@ Viewport screenshot alternative: `save_viewport()` captures the current 3D viewp
 | UpTorso | (0.000, -1.000, 0.400) | 8° lean applied |
 | UpperTorso | (0.000, -1.000, 0.400) | Driven by COPY_TRANSFORMS |
 | Head | (0.000, -0.777, 1.984) | Face -Y, back +Y |
-| ORG_UpperArm.L | (1.000, -0.810, 1.749) | Shoulder |
-| ORG_LowerArm.L | (1.215, -0.880, 0.896) | Elbow — bent naturally |
-| ORG_Hand.L | (0.700, -1.000, 0.000) | Hand on ground |
-| ORG_UpperArm.R | (-1.000, -0.810, 1.749) | Shoulder |
-| ORG_LowerArm.R | (-1.215, -0.880, 0.896) | Elbow — bent naturally |
-| ORG_Hand.R | (-0.700, -1.000, 0.000) | Hand on ground |
+| ORG_UpperArm.L | (1.000, -0.810, 1.750) | Shoulder |
+| ORG_LowerArm.L | (1.322, -0.980, 0.945) | Elbow — bent outward naturally |
+| ORG_Hand.L | (1.200, -1.000, 0.000) | Hand on ground at side |
+| ORG_UpperArm.R | (-1.000, -0.810, 1.750) | Shoulder |
+| ORG_LowerArm.R | (-1.322, -0.980, 0.945) | Elbow — bent outward naturally |
+| ORG_Hand.R | (-1.200, -1.000, 0.000) | Hand on ground at side |
 | ORG_UpperLeg.L | (0.500, -1.000, 0.000) | Hip — leg starts at Z=0 |
 | ORG_LowerLeg.L | (0.646, -1.809, 0.000) | Knee — **Z=0, perfectly flat** |
 | ORG_Foot.L | (0.480, -2.720, 0.000) | Foot at full leg extension, Z=0 |
@@ -197,7 +197,7 @@ Viewport screenshot alternative: `save_viewport()` captures the current 3D viewp
 - Foot Y axis: points (0, -1, 0) — forward in line with leg, NOT flattened to floor ✓
 - Foot position: Y=-2.720, full leg extension (bone length 1.748 from hip at Y=-1.000)
 - Hands: Z=0.000 — resting on ground at sides
-- Arm chain (L): shoulder (1.00,-0.81,1.75) → elbow (1.215,-0.88,0.896) → hand (0.70,-1.00,0.00) — natural bent arc
+- Arm chain (L): shoulder (1.00,-0.81,1.75) → elbow (1.322,-0.98,0.945) → hand (1.20,-1.00,0.00) — natural bent arc, hands at sides outside torso
 - L/R symmetry: perfect (all pairs match within 0.001)
 
 **Known trade-offs:**
@@ -370,7 +370,7 @@ The **blender-mcp** addon (v1.2, ahujasid/blender-mcp) connects via raw TCP on p
 3. **Face toward camera (-Y):** Character looks toward the viewer at Y=-4.5
 4. **Legs straight, flat on ground:** All leg bones at Z=0.000 from hip to foot. No knee bend. Feet at full extension Y=-2.720 (total leg bone length 1.748 from hip at Y=-1.000). POLE targets aligned with leg direction (Y=-2.0, Z=0) to prevent knee collapse or arching.
 5. **Feet point forward (not flat on floor):** FOOT_ROLL rotated 90° around X to tilt feet to point forward in line with the straight legs. ORG_Foot Y axis = (0, -1, 0). This overrides the rig's default auto-flattening behavior that rotates feet parallel to the ground plane.
-6. **Arms at sides with bent elbows:** Hands at Y=-1.0, Z=0.0 (on ground at sides). Elbows bent outward via POLE_ARM at Y=-0.9, Z=1.0. NOT straight — natural relaxed arc from shoulder through elbow to hand.
+6. **Arms at sides with bent elbows:** Hands at X=±1.2, Y=-1.0, Z=0.0 (on ground at sides, outside torso width of 2.0). Elbows bent outward via POLE_ARM at X=±1.1, Y=-0.85, Z=1.0. NOT straight — natural relaxed arc from shoulder through elbow to hand.
 7. **L/R symmetry:** Perfect ±X mirroring for all paired bones
 
 ## 7. Foot Rotation Mechanism (FOOT_ROLL → MCH Chain)
