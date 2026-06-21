@@ -132,9 +132,9 @@ Three SUN lamps + World ambient create warm evening light:
 
 Viewport screenshot alternative: `save_viewport()` captures the current 3D viewport angle (useful for checking from different angles without re-rendering).
 
-### 3.4 Current Pose State (2026-06-20 — arms at sides, bent elbows)
+### 3.4 Current Pose State (2026-06-20 — straight legs, feet forward, hands on ground)
 
-**Pose:** Seated on ground under tree, face toward camera (-Y), arms resting at sides with bent elbows, legs extended forward. This is the definitive pose — user requested arms at sides (not behind back), butt and feet flat on ground, natural elbow bend.
+**Pose:** Seated on ground under tree, face toward camera (-Y), hands resting on ground, **legs perfectly straight and flat on ground**, **feet aligned with legs (not auto-flattened to floor)**. User explicitly requested: no knee bend, legs flat on floor, feet stay on legs pointing forward.
 
 **Armature transform:** `rotation_euler = (0, 0, π)` (180° Z), `location = (0, -2, 0)`. This flips the character to face -Y while keeping ROOT at world (0, -1, -2).
 
@@ -146,14 +146,21 @@ Viewport screenshot alternative: `save_viewport()` captures the current 3D viewp
 | LowerTorso | (0, -1, 0) | Butt on ground ✓ |
 | UpTorso | (0, -1, 0.4) | 8° backward lean (`rot_euler.x = 0.14`) |
 | Head | (0, -0.777, 1.984) | Face at Y=-0.777, back near tree |
-| IK_Hand.L | (0.700, -1.000, 0.350) | Hand at character's side near hip |
-| IK_Hand.R | (-0.700, -1.000, 0.350) | |
-| IK_LEG.L | (0.450, -2.750, 0.150) | Foot extended forward toward camera |
-| IK_LEG.R | (-0.450, -2.750, 0.150) | |
+| IK_Hand.L | (0.700, -1.000, 0.000) | Hand on ground at side |
+| IK_Hand.R | (-0.700, -1.000, 0.000) | |
+| IK_LEG.L | (0.480, -3.472, -0.246) | **Compensated for foot rotation offset** |
+| IK_LEG.R | (-0.480, -3.472, -0.246) | |
 | POLE_ARM.L | (0.850, -0.900, 1.000) | Elbow guide — creates natural bend |
 | POLE_ARM.R | (-0.850, -0.900, 1.000) | |
-| POLE_LEG.L | (0.500, -1.300, 0.050) | Knee guide (low, near ground) |
-| POLE_LEG.R | (-0.500, -1.300, 0.050) | |
+| POLE_LEG.L | (0.500, -2.000, 0.000) | Knee guide — **aligned with full leg extension** |
+| POLE_LEG.R | (-0.500, -2.000, 0.000) | |
+
+**FOOT_ROLL rotation (critical — controls foot orientation):**
+
+| Bone | Rotation Euler (XYZ) | Notes |
+|------|---------------------|-------|
+| FOOT_ROLL.L | (π/2, 0, 0) = (90°, 0, 0) | Tilts foot to point forward in line with leg |
+| FOOT_ROLL.R | (π/2, 0, 0) = (90°, 0, 0) | Instead of auto-flattening to ground |
 
 **Deform bone verification (world space):**
 
@@ -166,29 +173,37 @@ Viewport screenshot alternative: `save_viewport()` captures the current 3D viewp
 | Head | (0.000, -0.777, 1.984) | Face -Y, back +Y |
 | ORG_UpperArm.L | (1.000, -0.810, 1.749) | Shoulder |
 | ORG_LowerArm.L | (1.215, -0.880, 0.896) | Elbow — bent naturally |
-| ORG_Hand.L | (0.700, -1.000, 0.350) | Hand at side near hip |
+| ORG_Hand.L | (0.700, -1.000, 0.000) | Hand on ground |
 | ORG_UpperArm.R | (-1.000, -0.810, 1.749) | Shoulder |
 | ORG_LowerArm.R | (-1.215, -0.880, 0.896) | Elbow — bent naturally |
-| ORG_Hand.R | (-0.700, -1.000, 0.350) | Hand at side near hip |
-| ORG_UpperLeg.L | (0.500, -1.000, 0.000) | Hip |
-| ORG_LowerLeg.L | (0.477, -1.818, 0.072) | Knee |
-| ORG_Foot.L | (0.450, -2.750, 0.150) | Foot nearly flush with ground |
-| ORG_UpperLeg.R | (-0.500, -1.000, 0.000) | Hip |
-| ORG_LowerLeg.R | (-0.477, -1.818, 0.072) | Knee |
-| ORG_Foot.R | (-0.450, -2.750, 0.150) | Foot nearly flush with ground |
+| ORG_Hand.R | (-0.700, -1.000, 0.000) | Hand on ground |
+| ORG_UpperLeg.L | (0.500, -1.000, 0.000) | Hip — leg starts at Z=0 |
+| ORG_LowerLeg.L | (0.646, -1.809, 0.000) | Knee — **Z=0, perfectly flat** |
+| ORG_Foot.L | (0.480, -2.720, 0.000) | Foot at full leg extension, Z=0 |
+| ORG_UpperLeg.R | (-0.500, -1.000, 0.000) | Hip — leg starts at Z=0 |
+| ORG_LowerLeg.R | (-0.646, -1.809, 0.000) | Knee — **Z=0, perfectly flat** |
+| ORG_Foot.R | (-0.480, -2.720, 0.000) | Foot at full leg extension, Z=0 |
+
+**Foot orientation (Y=forward, Z=up):**
+| Bone | Y Axis (toe direction) | Z Axis (top of foot) |
+|------|----------------------|---------------------|
+| ORG_Foot.L | (0.000, -1.000, 0.002) — forward ✓ | (0.000, -0.002, -1.000) — top up ✓ |
+| ORG_Foot.R | (0.000, -1.000, 0.002) — forward ✓ | (0.000, -0.002, -1.000) — top up ✓ |
 
 **Key metrics:**
-- Butt: LowerTorso mesh bottom Z=0.000, ground Z=-0.074 → clearance +0.074 (effectively touching)
-- Feet: ORG_Foot bone Z=0.15, mesh bottom Z=-0.102 → 0.028 studs below ground (nearly flush)
-- Hands: Z=0.35 at hips — resting naturally at sides, not planted on ground
-- Arm chain (L): shoulder (1.00,-0.81,1.75) → elbow (1.215,-0.88,0.896) → hand (0.70,-1.00,0.35) — natural bent arc
-- Knee height: Z=0.072 (very low, legs nearly flat)
+- Butt: LowerTorso at Z=0.000 — seated on ground ✓
+- Legs: All leg bones (UpperLeg, LowerLeg, Foot) at Z=0.000 — perfectly flat ✓
+- Knee: Z=0.000, no bend — straight leg from hip to foot ✓
+- Foot Y axis: points (0, -1, 0) — forward in line with leg, NOT flattened to floor ✓
+- Foot position: Y=-2.720, full leg extension (bone length 1.748 from hip at Y=-1.000)
+- Hands: Z=0.000 — resting on ground at sides
+- Arm chain (L): shoulder (1.00,-0.81,1.75) → elbow (1.215,-0.88,0.896) → hand (0.70,-1.00,0.00) — natural bent arc
 - L/R symmetry: perfect (all pairs match within 0.001)
 
 **Known trade-offs:**
-- **Leg-ground clipping:** UpperLeg mesh bottoms at Z=-0.650 (0.576 below ground), LowerLeg at Z=-0.594 (0.520 below). Unavoidable with blocky R15 limbs (~1.2 studs thick) in horizontal-legged seated pose with butt on ground.
+- **Leg-ground clipping:** UpperLeg mesh bottoms at Z≈-0.65 (0.6 below ground), LowerLeg at Z≈-0.59 (0.6 below). Unavoidable with blocky R15 limbs (~1.2 studs thick) in horizontal-legged seated pose with butt on ground.
 - **Knee interpenetration:** LeftLowerLeg and RightLowerLeg bboxes overlap at knees — legs positioned close together with blocky meshes.
-- **Hand Z diagnostic:** `diagnose_issues()` flags hands as "off ground" (Z=0.35), but this is intentional — arms are at sides, not planted.
+- **IK_LEG position below ground (Z=-0.246):** Compensates for the FOOT_ROLL X=90° rotation which shifts MCH_IK_Foot upward and backward. The IK target must be pushed out to Y=-3.472 and down to Z=-0.246 so the resulting foot lands at Z=0, Y=-2.720.
 
 ### 3.5 Torso Control
 
@@ -353,14 +368,49 @@ The **blender-mcp** addon (v1.2, ahujasid/blender-mcp) connects via raw TCP on p
 1. **Butt on ground:** LowerTorso at Z=0 (ROOT world Z=-2), mesh bottom at Z=0.000
 2. **Back near tree:** Torso leaned back 8° — LowerTorso back near tree trunk, UpperTorso/Head close but not penetrating
 3. **Face toward camera (-Y):** Character looks toward the viewer at Y=-4.5
-4. **Legs extended forward:** Feet at Y=-2.75 (toward camera), knees nearly flat on ground (Z=0.072)
-5. **Arms at sides with bent elbows:** Hands at Y=-1.0, Z=0.35 (at hip level). Elbows bent outward via POLE_ARM at Y=-0.9, Z=1.0. NOT straight — natural relaxed arc from shoulder through elbow to hand.
-6. **L/R symmetry:** Perfect ±X mirroring for all paired bones
-7. **Feet nearly flush:** Bone center Z=0.15, mesh bottom at Z=-0.102 (0.028 below ground — effectively flush given blocky geometry)
+4. **Legs straight, flat on ground:** All leg bones at Z=0.000 from hip to foot. No knee bend. Feet at full extension Y=-2.720 (total leg bone length 1.748 from hip at Y=-1.000). POLE targets aligned with leg direction (Y=-2.0, Z=0) to prevent knee collapse or arching.
+5. **Feet point forward (not flat on floor):** FOOT_ROLL rotated 90° around X to tilt feet to point forward in line with the straight legs. ORG_Foot Y axis = (0, -1, 0). This overrides the rig's default auto-flattening behavior that rotates feet parallel to the ground plane.
+6. **Arms at sides with bent elbows:** Hands at Y=-1.0, Z=0.0 (on ground at sides). Elbows bent outward via POLE_ARM at Y=-0.9, Z=1.0. NOT straight — natural relaxed arc from shoulder through elbow to hand.
+7. **L/R symmetry:** Perfect ±X mirroring for all paired bones
+
+## 7. Foot Rotation Mechanism (FOOT_ROLL → MCH Chain)
+
+The R15 rig automatically flattens feet to be parallel with the ground (standard for walking/running). To override this for a seated pose where feet point forward:
+
+**Chain:** `FOOT_ROLL → MCH_FOOT_BACK (Transform constraint) → MCH_FOOT_LEFT_SIDE → MCH_INT_IK_LEG → MCH_IK_Foot → MCH_SWITCH_Foot → ORG_Foot (Copy Transforms, WORLD)`
+
+- **FOOT_ROLL** — child of IK_LEG, identity rotation by default, NO constraints. The user-facing control point for foot rotation.
+- **MCH_FOOT_BACK** — child of IK_LEG, has a TRANSFORM constraint targeting FOOT_ROLL. Propagates FOOT_ROLL's rotation into the MCH chain.
+- **MCH_IK_Foot** — copies rotation from MCH_INT_IK_LEG. Its world position is the IK target for the leg chain.
+- **MCH_SWITCH_Foot** — Copy Transforms from MCH_IK_Foot (influence 1 when IK mode is on) and from FK_Foot (influence 0).
+- **ORG_Foot** — Copy Transforms from MCH_SWITCH_Foot in WORLD space. The final deform bone.
+
+**To tilt feet forward:** Set `FOOT_ROLL.{side}.rotation_euler = Euler((π/2, 0, 0), 'XYZ')` — 90° around X.
+
+**IMPORTANT:** Rotating FOOT_ROLL shifts MCH_IK_Foot's world position, which changes where the IK solver places the foot. After rotating FOOT_ROLL, you MUST compensate by adjusting IK_LEG position:
+```python
+# 1. Rotate feet to point forward
+bones["FOOT_ROLL.L"].rotation_euler = Euler((math.radians(90), 0, 0), 'XYZ')
+bones["FOOT_ROLL.R"].rotation_euler = Euler((math.radians(90), 0, 0), 'XYZ')
+bpy.context.view_layer.update()
+
+# 2. Measure the foot position shift
+foot = bone_world_pos("ORG_Foot.L")
+dy = target_y - foot.y  # ~-0.752 (foot moves back toward hip)
+dz = target_z - foot.z  # ~-0.246 (foot moves up)
+
+# 3. Push IK_LEG further out to compensate
+ik = bone_world_pos("IK_LEG.L")
+set_ik_world("IK_LEG.L", Vector((ik.x, ik.y + dy, ik.z + dz)))
+```
+
+**Current compensation values** (for straight legs at Z=0):
+- IK_LEG at Y=-3.472, Z=-0.246 → resulting foot at Y=-2.720, Z=0.000
+- POLE_LEG at Y=-2.000, Z=0.000 (aligned with leg direction)
 
 ---
 
-## 7. Blender 5.1 API Notes
+## 8. Blender 5.1 API Notes
 
 - Use `bpy.context.temp_override(area=area)` for context-sensitive operators.
 - `MeshLoopTriangle.select` — removed. Use `MeshPolygon.select`.
@@ -375,7 +425,7 @@ The **blender-mcp** addon (v1.2, ahujasid/blender-mcp) connects via raw TCP on p
 
 ---
 
-## 8. Project Context
+## 9. Project Context
 
 - **Repo:** `/home/willi/Documents/GearRNG` — git, main branch
 - **Roblox game:** "Gear RNG" — loot/rng simulator
@@ -385,12 +435,12 @@ The **blender-mcp** addon (v1.2, ahujasid/blender-mcp) connects via raw TCP on p
 
 ---
 
-## 9. Git Workflow
+## 10. Git Workflow
 
 ```bash
 cd /home/willi/Documents/GearRNG
 git add assets/MenuScene.blend assets/MenuScene.fbx assets/BLENDER_POSING_REFERENCE.md
-git commit -m "Repose character: seated pose with hands on ground, legs extended"
+git commit -m "Repose character: straight legs flat on ground, feet pointing forward, hands on ground"
 # Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
