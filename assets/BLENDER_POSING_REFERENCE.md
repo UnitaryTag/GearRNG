@@ -7,7 +7,7 @@
 
 ## 1. The Task
 
-Pose the Roblox R15 blocky character in a **seated pose on the ground** (butt at Z=0, legs extended forward, hands on ground for support). The posed character lives in `MenuScene.blend` and gets exported to `MenuScene.fbx` for Roblox.
+Pose the Roblox R15 blocky character in a **seated pose against the tree, facing the camera** (butt at Z=0, legs extended forward toward camera, hands on ground behind back for support, back resting against tree trunk). The posed character lives in `MenuScene.blend` and gets exported to `MenuScene.fbx` for Roblox.
 
 **File:** `/home/willi/Documents/GearRNG/assets/MenuScene.blend` — open this in Blender.  
 **Output:** Save blend, re-export FBX.
@@ -23,9 +23,11 @@ Pose the Roblox R15 blocky character in a **seated pose on the ground** (butt at
 ### 2.1 Coordinate System
 
 - **Z is UP** (ground plane at Z≈0)
-- **Y is FORWARD** (character faces -Y or +Y depending on orientation)
-- **X is LEFT/RIGHT**
+- **Y is FORWARD** — character currently faces **-Y** (toward camera), back toward **+Y** (tree)
+- **X is LEFT/RIGHT** — character's left = world +X, character's right = world -X (after 180° Z rotation)
 - 1 Blender unit = 1 Roblox stud
+
+**Important:** The armature has a 180° Z rotation (`rotation_euler = (0, 0, π)`) with a `(0, -2, 0)` location offset. This flips the character to face -Y while keeping ROOT at the same world position. Because of this rotation, the character's local X is inverted: `.L` bones correspond to world +X, `.R` bones to world -X.
 
 ### 2.2 Critical: ROOT ≠ Pelvis
 
@@ -130,49 +132,68 @@ Three SUN lamps + World ambient create warm evening light:
 
 Viewport screenshot alternative: `save_viewport()` captures the current 3D viewport angle (useful for checking from different angles without re-rendering).
 
-### 3.4 Current Pose State (refined 2026-06-20)
+### 3.4 Current Pose State (2026-06-20 — 180° flip, final)
 
-**Pose:** Seated on ground, legs extended forward, torso leaned back ~12°, hands on ground behind hips for support.
+**Pose:** Seated on ground, back resting against tree trunk, face toward camera (-Y), hands on ground behind back, legs extended forward. This is the definitive pose after the 180° Z armature rotation.
 
-IK targets in world space:
+**Armature transform:** `rotation_euler = (0, 0, π)` (180° Z), `location = (0, -2, 0)`. This flips the character to face -Y while keeping ROOT at world (0, -1, -2).
 
-| Bone | World Position (X, Y, Z) |
-|------|--------------------------|
-| ROOT | (0, 0, -2.0) |
-| LowerTorso | (0, 0, 0) ← butt on ground |
-| UpperTorso | (0, 0, 0.4) |
-| Head | (0, -0.333, 1.965) ← tilted back from torso lean |
-| IK_Hand.L | (-0.55, 0.35, 0.03) ← hand behind hip on ground |
-| IK_Hand.R | (0.55, 0.35, 0.03) |
-| IK_LEG.L | (-0.45, -1.75, 0.03) ← foot extended forward |
-| IK_LEG.R | (0.45, -1.75, 0.03) |
-| POLE_ARM.L | (-0.80, 0.45, 0.15) |
-| POLE_ARM.R | (0.80, 0.45, 0.15) |
-| POLE_LEG.L | (-0.50, -0.70, 0.20) ← knees near ground |
-| POLE_LEG.R | (0.50, -0.70, 0.20) |
+**IK targets in world space:**
 
-Deform bone verification:
+| Bone | World Position (X, Y, Z) | Notes |
+|------|--------------------------|-------|
+| ROOT | (0, -1, -2) | World position after armature offset |
+| LowerTorso | (0, -1, 0) | Butt on ground |
+| UpTorso | (0, -1, 0.4) | 8° backward lean (`rot_euler.x = 0.14`) |
+| Head | (0, -0.777, 1.984) | Face at Y=-1.384, back at Y=-0.030 (0.38 stud gap to tree) |
+| IK_Hand.L | (0.55, -0.35, 0.03) | Hand behind back on ground near tree base |
+| IK_Hand.R | (-0.55, -0.35, 0.03) | |
+| IK_LEG.L | (0.45, -2.75, 0.03) | Foot extended forward toward camera |
+| IK_LEG.R | (-0.45, -2.75, 0.03) | |
+| POLE_ARM.L | (0.80, -0.50, 0.80) | Elbow guide |
+| POLE_ARM.R | (-0.80, -0.50, 0.80) | |
+| POLE_LEG.L | (0.50, -1.30, 0.05) | Knee guide (low, near ground) |
+| POLE_LEG.R | (-0.50, -1.30, 0.05) | |
 
-| ORG Bone | World Position |
-|----------|---------------|
-| ORG_Foot.L | (-0.450, -1.750, 0.030) |
-| ORG_Foot.R | (0.450, -1.750, 0.030) |
-| ORG_Hand.L | (-0.550, 0.350, 0.030) |
-| ORG_Hand.R | (0.550, 0.350, 0.030) |
-| ORG_LowerArm.L | (-0.675, 0.188, 1.060) |
-| ORG_LowerArm.R | (0.675, 0.188, 1.060) |
-| ORG_LowerLeg.L | (-0.477, -0.821, 0.016) |
-| ORG_LowerLeg.R | (0.477, -0.821, 0.016) |
-| ORG_UpperArm.L | (-0.999, -0.283, 1.733) |
-| ORG_UpperArm.R | (0.999, -0.283, 1.733) |
-| ORG_UpperLeg.L | (-0.500, 0.000, 0.000) |
-| ORG_UpperLeg.R | (0.500, 0.000, 0.000) |
+**Deform bone verification (world space):**
+
+| ORG Bone | World Position | Notes |
+|----------|---------------|-------|
+| ROOT | (0.000, -1.000, -2.000) | Master control |
+| LowerTorso | (0.000, -1.000, 0.000) | Butt at Z=0 ✓ |
+| UpTorso | (0.000, -1.000, 0.400) | 8° lean applied |
+| UpperTorso | (0.000, -1.000, 0.400) | Driven by COPY_TRANSFORMS |
+| Head | (0.000, -0.777, 1.984) | Face -Y, back +Y |
+| ORG_UpperArm.L | (1.000, -0.810, 1.749) | |
+| ORG_LowerArm.L | (0.963, -0.745, 0.869) | |
+| ORG_Hand.L | (0.550, -0.350, 0.030) | L hand = +X world |
+| ORG_UpperArm.R | (-1.000, -0.810, 1.749) | |
+| ORG_LowerArm.R | (-0.963, -0.745, 0.869) | |
+| ORG_Hand.R | (-0.550, -0.350, 0.030) | R hand = -X world |
+| ORG_UpperLeg.L | (0.500, -1.000, 0.000) | |
+| ORG_LowerLeg.L | (0.477, -1.821, 0.016) | Knee at Z=0.016 (nearly flat) ✓ |
+| ORG_Foot.L | (0.450, -2.750, 0.030) | L foot = +X world |
+| ORG_UpperLeg.R | (-0.500, -1.000, 0.000) | |
+| ORG_LowerLeg.R | (-0.477, -1.821, 0.016) | Knee at Z=0.016 ✓ |
+| ORG_Foot.R | (-0.450, -2.750, 0.030) | R foot = -X world |
+
+**Key metrics:**
+- Knee height: Z=0.016 (excellent — nearly flat on ground)
+- Hands: Z=0.03 (on ground surface)
+- Feet: Z=0.03 (on ground surface)
+- Head back to tree: ~0.38 stud gap (UpperTorso back: ~0.12 stud gap, LowerTorso back touches)
+- L/R symmetry: perfect (all pairs match within 0.001)
+- 2-bone IK leg extension: 99.8% of max (hip→foot = 1.751 vs bone total = 1.748)
 
 ### 3.5 Torso Control
 
-The torso lean is applied via **UpTorso** bone (rotation around X), which drives UpperTorso through a `COPY_TRANSFORMS` constraint. The `TORSO` bone is the master torso control. Do NOT rotate UpperTorso directly — it will be overwritten by the constraint.
+The torso lean is applied via **UpTorso** bone (`rotation_euler.x = 0.14` = 8° backward lean). UpperTorso is driven through a `COPY_TRANSFORMS` constraint. Do NOT rotate UpperTorso directly — it will be overwritten by the constraint.
 
-IK hands are parented to ROOT (ARM_IK_PARENT=0), so they stay planted when the torso rotates. This is the correct setup for a hands-on-ground support pose.
+**Current lean:** 8° backward (toward tree / +Y). This is the sweet spot: enough to create visible contact between LowerTorso back and the tree, but not so much that the head penetrates the trunk.
+
+**With 180° Z armature rotation:** Positive X rotation on UpTorso tilts the character backward (toward +Y / tree). This is because the armature rotation flips the bone's local axes — in the pre-flip orientation, +X rotation tilted forward, but post-flip it tilts backward.
+
+IK hands are parented to ROOT (`ARM_IK_PARENT=0`), so they stay planted when the torso rotates. This is the correct setup for a hands-on-ground support pose.
 
 ---
 
@@ -323,13 +344,14 @@ The **blender-mcp** addon (v1.2, ahujasid/blender-mcp) connects via raw TCP on p
 
 ## 6. Target Pose Description
 
-**"Seated on the ground, leaned back"** — natural, relaxed, hands supporting:
-1. **Butt on ground:** LowerTorso at Z=0 (achieved via ROOT at Z=-2.0)
-2. **Legs extended forward:** Feet at Y=-1.75, knees near ground (Z=0.016) — achieved by POLE_LEG at Z=0.20
-3. **Hands on ground behind hips** for support (Y=+0.35) — achieved with IK_Hand targets behind body
-4. **Torso leaned back ~12°** via UpTorso X rotation — shoulders shift back (Y=-0.283), head tilts back
-5. **Head tilted back** from torso lean, looking slightly upward
-6. **Elbows bent naturally** — arms angle from shoulders (Z=1.73) down to ground (Z=0.03) with elbows at Z=1.06
+**"Sitting against the tree, facing the camera"** — relaxed, cinematic:
+1. **Butt on ground:** LowerTorso at Z=0 (ROOT world Z=-2)
+2. **Back against tree:** Torso leaned back 8° — LowerTorso back touches tree trunk, UpperTorso/Head close but not penetrating
+3. **Face toward camera (-Y):** Character looks toward the viewer at Y=-4.5
+4. **Legs extended forward:** Feet at Y=-2.75 (toward camera), knees nearly flat on ground (Z=0.016)
+5. **Hands on ground behind back:** At Y=-0.35, Z=0.03 — supportive, planted between back and tree
+6. **L/R symmetry:** Perfect ±X mirroring for all paired bones
+7. **Elbows bent naturally:** Arms angle from shoulders (Z=1.75) down to ground (Z=0.03) with elbows at Z=0.87
 
 ---
 
@@ -363,7 +385,7 @@ The **blender-mcp** addon (v1.2, ahujasid/blender-mcp) connects via raw TCP on p
 ```bash
 cd /home/willi/Documents/GearRNG
 git add assets/MenuScene.blend assets/MenuScene.fbx assets/BLENDER_POSING_REFERENCE.md
-git commit -m "Refine seated pose: knees flat, hands behind hips, torso leaned back"
+git commit -m "Repose character: seated with back to tree, face to camera, hands behind back"
 # Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
