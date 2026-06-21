@@ -13,8 +13,9 @@ sourcemap.json
 *.blend1
 *.blend2
 
-# Debug / temp
+# Blender vision screenshots (generated, user-side viewing only)
 assets/viewport_*.png
+assets/render_preview.png
 
 # OS
 .DS_Store
