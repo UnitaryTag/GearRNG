@@ -134,7 +134,7 @@ Viewport screenshot alternative: `save_viewport()` captures the current 3D viewp
 
 ### 3.4 Current Pose State (2026-06-20 — arms at sides, bent elbows)
 
-**Pose:** Seated on ground under tree, face toward camera (-Y), arms resting at sides with bent elbows, legs extended forward. This is the definitive pose — user requested arms at sides (not behind back), butt and feet flat on ground, natural elbow bend.
+**Pose:** Seated on ground under tree, face toward camera (-Y), arms resting at sides with bent elbows, knees bent upward, feet resting on top of upper legs/thighs. This is the definitive pose — user requested arms at sides (not behind back), butt on ground, feet on his legs.
 
 **Armature transform:** `rotation_euler = (0, 0, π)` (180° Z), `location = (0, -2, 0)`. This flips the character to face -Y while keeping ROOT at world (0, -1, -2).
 
@@ -148,12 +148,12 @@ Viewport screenshot alternative: `save_viewport()` captures the current 3D viewp
 | Head | (0, -0.777, 1.984) | Face at Y=-0.777, back near tree |
 | IK_Hand.L | (0.700, -1.000, 0.350) | Hand at character's side near hip |
 | IK_Hand.R | (-0.700, -1.000, 0.350) | |
-| IK_LEG.L | (0.450, -2.750, 0.150) | Foot extended forward toward camera |
-| IK_LEG.R | (-0.450, -2.750, 0.150) | |
+| IK_LEG.L | (0.500, -1.400, 0.750) | Foot resting on top of upper leg/thigh |
+| IK_LEG.R | (-0.500, -1.400, 0.750) | |
 | POLE_ARM.L | (0.850, -0.900, 1.000) | Elbow guide — creates natural bend |
 | POLE_ARM.R | (-0.850, -0.900, 1.000) | |
-| POLE_LEG.L | (0.500, -1.300, 0.050) | Knee guide (low, near ground) |
-| POLE_LEG.R | (-0.500, -1.300, 0.050) | |
+| POLE_LEG.L | (0.550, -1.100, 1.200) | Knee guide (raised for bent knee) |
+| POLE_LEG.R | (-0.550, -1.100, 1.200) | |
 
 **Deform bone verification (world space):**
 
@@ -171,24 +171,26 @@ Viewport screenshot alternative: `save_viewport()` captures the current 3D viewp
 | ORG_LowerArm.R | (-1.215, -0.880, 0.896) | Elbow — bent naturally |
 | ORG_Hand.R | (-0.700, -1.000, 0.350) | Hand at side near hip |
 | ORG_UpperLeg.L | (0.500, -1.000, 0.000) | Hip |
-| ORG_LowerLeg.L | (0.477, -1.818, 0.072) | Knee |
-| ORG_Foot.L | (0.450, -2.750, 0.150) | Foot nearly flush with ground |
+| ORG_LowerLeg.L | (0.579, -0.484, 0.635) | Knee — bent upward |
+| ORG_Foot.L | (0.500, -1.400, 0.750) | Foot resting on thigh |
 | ORG_UpperLeg.R | (-0.500, -1.000, 0.000) | Hip |
-| ORG_LowerLeg.R | (-0.477, -1.818, 0.072) | Knee |
-| ORG_Foot.R | (-0.450, -2.750, 0.150) | Foot nearly flush with ground |
+| ORG_LowerLeg.R | (-0.579, -0.484, 0.635) | Knee — bent upward |
+| ORG_Foot.R | (-0.500, -1.400, 0.750) | Foot resting on thigh |
 
 **Key metrics:**
 - Butt: LowerTorso mesh bottom Z=0.000, ground Z=-0.074 → clearance +0.074 (effectively touching)
-- Feet: ORG_Foot bone Z=0.15, mesh bottom Z=-0.102 → 0.028 studs below ground (nearly flush)
+- Feet: ORG_Foot bone Z=0.75 resting on upper legs (thighs). Foot mesh Z[0.50:0.80] intersects upper leg Z[−0.48:1.14] by ~0.64 studs — resting inside thigh surface.
 - Hands: Z=0.35 at hips — resting naturally at sides, not planted on ground
 - Arm chain (L): shoulder (1.00,-0.81,1.75) → elbow (1.215,-0.88,0.896) → hand (0.70,-1.00,0.35) — natural bent arc
-- Knee height: Z=0.072 (very low, legs nearly flat)
+- Knee height: Z=0.635 (bent upward from hip)
+- LowerLeg: Y=−0.484 (forward of hip), Z=0.635 (elevated above upper leg)
 - L/R symmetry: perfect (all pairs match within 0.001)
 
 **Known trade-offs:**
-- **Leg-ground clipping:** UpperLeg mesh bottoms at Z=-0.650 (0.576 below ground), LowerLeg at Z=-0.594 (0.520 below). Unavoidable with blocky R15 limbs (~1.2 studs thick) in horizontal-legged seated pose with butt on ground.
-- **Knee interpenetration:** LeftLowerLeg and RightLowerLeg bboxes overlap at knees — legs positioned close together with blocky meshes.
+- **Foot-thigh intersection:** Feet rest ON the upper legs/thighs — foot mesh overlaps with upper leg mesh by ~0.64 studs. This is intentional (user requested feet on legs) and visually reads as feet resting on thighs.
+- **Knee interpenetration:** LeftLowerLeg and RightLowerLeg bboxes may overlap at knees — legs positioned close together with blocky meshes.
 - **Hand Z diagnostic:** `diagnose_issues()` flags hands as "off ground" (Z=0.35), but this is intentional — arms are at sides, not planted.
+- **Leg Z diagnostic:** `diagnose_issues()` flags feet as "off ground" (Z=0.75), but this is intentional — feet are on thighs, not on ground.
 
 ### 3.5 Torso Control
 
@@ -353,10 +355,10 @@ The **blender-mcp** addon (v1.2, ahujasid/blender-mcp) connects via raw TCP on p
 1. **Butt on ground:** LowerTorso at Z=0 (ROOT world Z=-2), mesh bottom at Z=0.000
 2. **Back near tree:** Torso leaned back 8° — LowerTorso back near tree trunk, UpperTorso/Head close but not penetrating
 3. **Face toward camera (-Y):** Character looks toward the viewer at Y=-4.5
-4. **Legs extended forward:** Feet at Y=-2.75 (toward camera), knees nearly flat on ground (Z=0.072)
+4. **Knees bent upward, feet on thighs:** Knees at Z=0.635, bent upward. Feet at Y=−1.4, Z=0.75 resting on top of upper legs/thighs (per user request: "put his feet on his legs")
 5. **Arms at sides with bent elbows:** Hands at Y=-1.0, Z=0.35 (at hip level). Elbows bent outward via POLE_ARM at Y=-0.9, Z=1.0. NOT straight — natural relaxed arc from shoulder through elbow to hand.
 6. **L/R symmetry:** Perfect ±X mirroring for all paired bones
-7. **Feet nearly flush:** Bone center Z=0.15, mesh bottom at Z=-0.102 (0.028 below ground — effectively flush given blocky geometry)
+7. **Feet on thighs:** Bone center Z=0.75, mesh Z[0.50:0.80] — resting within upper leg mesh, not on ground
 
 ---
 
@@ -390,7 +392,7 @@ The **blender-mcp** addon (v1.2, ahujasid/blender-mcp) connects via raw TCP on p
 ```bash
 cd /home/willi/Documents/GearRNG
 git add assets/MenuScene.blend assets/MenuScene.fbx assets/BLENDER_POSING_REFERENCE.md
-git commit -m "Repose character: seated pose with hands on ground, legs extended"
+git commit -m "Repose character: knees bent, feet resting on thighs"
 # Co-Authored-By: Claude <noreply@anthropic.com>
 ```
 
